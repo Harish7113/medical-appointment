@@ -8,7 +8,13 @@ dotenv.config();
 const app = express();
 
 // Middleware
-app.use(cors());
+const frontendURL = process.env.FRONTEND_URL || "http://localhost:3000";
+
+app.use(cors({
+  origin: frontendURL,
+  credentials: true,
+}));
+
 app.use(express.json());
 
 // Database
