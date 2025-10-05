@@ -8,13 +8,10 @@ dotenv.config();
 const app = express();
 
 // Middleware
-const frontendURL = process.env.FRONTEND_URL || "http://localhost:3000";
-
 app.use(cors({
-  origin: frontendURL,
-  credentials: true,
+  origin: process.env.FRONTEND_URL, // Your frontend Render URL
+  credentials: true
 }));
-
 app.use(express.json());
 
 // Database
@@ -24,6 +21,9 @@ connectDB();
 app.use("/api/patients", require("./routes/patientRoutes"));
 app.use("/api/doctors", require("./routes/doctorRoutes"));
 app.use("/api/appointments", require("./routes/appointmentRoutes"));
+
+// Test route
+app.get("/", (req, res) => res.send("Backend is running!"));
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));

@@ -1,11 +1,10 @@
 const express = require("express");
 const router = express.Router();
-const doctorController = require("../controllers/doctorController");
+const { getDoctors, createDoctor, updateDoctor, deleteDoctor } = require("../controllers/doctorController");
 
-router.post("/", doctorController.createDoctor);
-router.get("/", doctorController.getDoctors);
-router.get("/:id", doctorController.getDoctor);
-router.put("/:id", doctorController.updateDoctor);
-router.delete("/:id", doctorController.deleteDoctor);
+router.get("/", getDoctors);
+router.post("/", createDoctor);
+router.put("/:id", updateDoctor);
+router.delete("/:id", deleteDoctor);
 
 module.exports = router;

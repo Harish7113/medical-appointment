@@ -1,58 +1,50 @@
 const Appointment = require("../models/Appointment");
 
-// Create Appointment
-exports.createAppointment = async (req, res) => {
-  try {
-    const appointment = await Appointment.create(req.body);
-    res.status(201).json(appointment);
-  } catch (error) {
-    res.status(400).json({ message: error.message });
-  }
-};
-
-// Get All Appointments
-exports.getAppointments = async (req, res) => {
+// GET all appointments
+const getAppointments = async (req, res) => {
   try {
     const appointments = await Appointment.find()
-      .populate("patient", "name age")
-      .populate("doctor", "name specialization");
+      .populate("patient")
+      .populate("doctor");
     res.json(appointments);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
   }
 };
 
-// Get Single Appointment
-exports.getAppointment = async (req, res) => {
+// CREATE appointment
+const createAppointment = async (req, res) => {
   try {
-    const appointment = await Appointment.findById(req.params.id)
-      .populate("patient", "name age")
-      .populate("doctor", "name specialization");
-    if (!appointment) return res.status(404).json({ message: "Appointment not found" });
-    res.json(appointment);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
+    const appointment = new Appointment(req.body);
+    const savedAppointment = await appointment.save();
+    res.status(201).json(savedAppointment);
+  } catch (err) {
+    res.status(400).json({ message: err.message });
   }
 };
 
-// Update Appointment
-exports.updateAppointment = async (req, res) => {
+// UPDATE appointment
+const updateAppointment = async (req, res) => {
   try {
-    const appointment = await Appointment.findByIdAndUpdate(req.params.id, req.body, { new: true });
-    if (!appointment) return res.status(404).json({ message: "Appointment not found" });
-    res.json(appointment);
-  } catch (error) {
-    res.status(400).json({ message: error.message });
+    const updatedAppointment = await Appointment.findByIdAndUpdate(
+      req.params.id,
+      req.body,
+      { new: true }
+    );
+    res.json(updatedAppointment);
+  } catch (err) {
+    res.status(400).json({ message: err.message });
   }
 };
 
-// Delete Appointment
-exports.deleteAppointment = async (req, res) => {
+// DELETE appointment
+const deleteAppointment = async (req, res) => {
   try {
-    const appointment = await Appointment.findByIdAndDelete(req.params.id);
-    if (!appointment) return res.status(404).json({ message: "Appointment not found" });
-    res.json({ message: "Appointment deleted successfully" });
-  } catch (error) {
-    res.status(500).json({ message: error.message });
+    await Appointment.findByIdAndDelete(req.params.id);
+    res.json({ message: "Appointment deleted" });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
   }
 };
+
+module.exports = { getAppointments, createAppointment, updateAppointment, deleteAppointment };
