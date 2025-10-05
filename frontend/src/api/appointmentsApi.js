@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_URL = `${process.env.REACT_APP_API_URL}/appointments`;
+const API_URL = `${process.env.REACT_APP_API_URL}/api/appointments`;
 
 export const getAppointments = () => axios.get(API_URL).then(res => res.data);
 export const addAppointment = (appointment) => axios.post(API_URL, appointment).then(res => res.data);
