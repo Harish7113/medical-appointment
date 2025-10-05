@@ -5,8 +5,9 @@ import { fetchPatients, addPatient, deletePatient, updatePatient } from "../feat
 const Patients = () => {
   const dispatch = useDispatch();
   const patients = useSelector((state) => state.patients.list);
+
   const [form, setForm] = useState({ name: "", age: "", gender: "", phone: "", email: "" });
-  const [editingId, setEditingId] = useState(null); // Track patient being edited
+  const [editingId, setEditingId] = useState(null); // Track the patient being edited
 
   useEffect(() => {
     dispatch(fetchPatients());
@@ -17,11 +18,10 @@ const Patients = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
     if (editingId) {
-      // Update patient
-      dispatch(updatePatient({ id: editingId, data: form }));
+      // Dispatch update thunk
+      dispatch(updatePatient({ id: editingId, patient: form }));
       setEditingId(null);
     } else {
-      // Add patient
       dispatch(addPatient(form));
     }
     setForm({ name: "", age: "", gender: "", phone: "", email: "" });
@@ -46,6 +46,7 @@ const Patients = () => {
   return (
     <div>
       <h1>Patients</h1>
+
       <form onSubmit={handleSubmit}>
         <input name="name" placeholder="Name" value={form.name} onChange={handleChange} required />
         <input name="age" type="number" placeholder="Age" value={form.age} onChange={handleChange} required />
