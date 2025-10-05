@@ -1,18 +1,45 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchPatients, addPatient, deletePatient } from "../features/patientsSlice";
+import { fetchPatients, addPatient, deletePatient, updatePatient } from "../features/patientsSlice";
 
 const Patients = () => {
   const dispatch = useDispatch();
   const patients = useSelector((state) => state.patients.list);
   const [form, setForm] = useState({ name: "", age: "", gender: "", phone: "", email: "" });
+  const [editingId, setEditingId] = useState(null); // Track patient being edited
 
-  useEffect(() => { dispatch(fetchPatients()); }, [dispatch]);
+  useEffect(() => {
+    dispatch(fetchPatients());
+  }, [dispatch]);
 
   const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
+
   const handleSubmit = (e) => {
     e.preventDefault();
-    dispatch(addPatient(form));
+    if (editingId) {
+      // Update patient
+      dispatch(updatePatient({ id: editingId, data: form }));
+      setEditingId(null);
+    } else {
+      // Add patient
+      dispatch(addPatient(form));
+    }
+    setForm({ name: "", age: "", gender: "", phone: "", email: "" });
+  };
+
+  const handleEdit = (patient) => {
+    setEditingId(patient._id);
+    setForm({
+      name: patient.name,
+      age: patient.age,
+      gender: patient.gender,
+      phone: patient.phone,
+      email: patient.email,
+    });
+  };
+
+  const handleCancel = () => {
+    setEditingId(null);
     setForm({ name: "", age: "", gender: "", phone: "", email: "" });
   };
 
@@ -30,13 +57,15 @@ const Patients = () => {
         </select>
         <input name="phone" placeholder="Phone" value={form.phone} onChange={handleChange} required />
         <input name="email" placeholder="Email" value={form.email} onChange={handleChange} required />
-        <button type="submit">Add Patient</button>
+        <button type="submit">{editingId ? "Update Patient" : "Add Patient"}</button>
+        {editingId && <button type="button" onClick={handleCancel}>Cancel</button>}
       </form>
 
       <ul>
         {patients.map((p) => (
           <li key={p._id}>
             {p.name} - {p.age} ({p.gender})
+            <button onClick={() => handleEdit(p)}>Update</button>
             <button onClick={() => dispatch(deletePatient(p._id))}>Delete</button>
           </li>
         ))}
