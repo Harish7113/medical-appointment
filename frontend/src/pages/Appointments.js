@@ -48,8 +48,11 @@ const Appointments = () => {
 
   if (loading) return <div>Loading...</div>;
 
-  const getPatientName = (id) => patients.find((p) => p._id === id)?.name || "Unknown";
-  const getDoctorName = (id) => doctors.find((d) => d._id === id)?.name || "Unknown";
+  // ✅ FIXED: using correct IDs (patientId / doctorId)
+  const getPatientName = (id) =>
+    patients.find((p) => String(p._id) === String(id))?.name || "Unknown";
+  const getDoctorName = (id) =>
+    doctors.find((d) => String(d._id) === String(id))?.name || "Unknown";
 
   return (
     <div>
@@ -65,7 +68,7 @@ const Appointments = () => {
       <ul>
         {appointments.map((a) => (
           <li key={a._id}>
-            {getPatientName(a.patient)} with {getDoctorName(a.doctor)} on{" "}
+            {getPatientName(a.patientId)} with {getDoctorName(a.doctorId)} on{" "}
             {a.date ? new Date(a.date).toLocaleDateString() : "No Date"}
             <button onClick={() => handleEdit(a)}>Update</button>
             <button onClick={() => handleDelete(a._id)}>Delete</button>
