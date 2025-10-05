@@ -1,22 +1,37 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchAppointments, addAppointment, updateAppointment, deleteAppointment } from "../features/appointmentsSlice";
+import {
+  fetchAppointments,
+  addAppointment,
+  updateAppointment,
+  deleteAppointment,
+} from "../features/appointmentsSlice";
 import { fetchDoctors } from "../features/doctorsSlice";
 import { fetchPatients } from "../features/patientsSlice";
 import AppointmentForm from "../components/AppointmentForm";
 
 const Appointments = () => {
   const dispatch = useDispatch();
-  const appointments = useSelector((state) => state.appointments.list);
-  const doctors = useSelector((state) => state.doctors.list);
-  const patients = useSelector((state) => state.patients.list);
+  const appointments = useSelector((state) => state.appointments.list || []);
+  const doctors = useSelector((state) => state.doctors.list || []);
+  const patients = useSelector((state) => state.patients.list || []);
 
   const [editingId, setEditingId] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    dispatch(fetchAppointments());
-    dispatch(fetchDoctors());
-    dispatch(fetchPatients());
+    const loadData = async () => {
+      try {
+        await dispatch(fetchDoctors());
+        await dispatch(fetchPatients());
+        await dispatch(fetchAppointments());
+      } catch (error) {
+        console.error("Error loading data:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadData();
   }, [dispatch]);
 
   const handleAddOrUpdate = (data) => {
@@ -31,20 +46,27 @@ const Appointments = () => {
   const handleEdit = (appointment) => setEditingId(appointment._id);
   const handleDelete = (id) => dispatch(deleteAppointment(id));
 
+  if (loading) return <div>Loading...</div>;
+
+  const getPatientName = (id) => patients.find((p) => p._id === id)?.name || "Unknown";
+  const getDoctorName = (id) => doctors.find((d) => d._id === id)?.name || "Unknown";
+
   return (
     <div>
       <h1>Appointments</h1>
+
       <AppointmentForm
         onSubmit={handleAddOrUpdate}
         doctors={doctors}
         patients={patients}
-        editingAppointment={appointments.find(a => a._id === editingId)}
+        editingAppointment={appointments.find((a) => a._id === editingId)}
       />
 
       <ul>
         {appointments.map((a) => (
           <li key={a._id}>
-            {a.patient.name} with {a.doctor.name} on {new Date(a.date).toLocaleDateString()}
+            {getPatientName(a.patient)} with {getDoctorName(a.doctor)} on{" "}
+            {a.date ? new Date(a.date).toLocaleDateString() : "No Date"}
             <button onClick={() => handleEdit(a)}>Update</button>
             <button onClick={() => handleDelete(a._id)}>Delete</button>
           </li>
